@@ -303,3 +303,60 @@
 .mt-4 {
   margin-top: 1.5rem;
 }
+
+/* ── Shopping Hints Card ── */
+.text-accent-primary { color: var(--accent-primary); }
+
+.hints-card {
+  width: 100%;
+  border: 2px solid var(--type-yellow);
+  background: linear-gradient(to bottom right, #ffffff, #fffbeb);
+}
+
+.hints-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.hints-desc {
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.hints-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.hint-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+}
+
+.hint-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.hint-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
