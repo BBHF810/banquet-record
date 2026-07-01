@@ -31,6 +31,16 @@
   --danger: #ef4444;
 }
 
+/* Type Color Utilities */
+.type-color-green { color: var(--type-green); }
+.type-color-purple { color: var(--type-purple); }
+.type-color-yellow { color: var(--type-yellow); }
+.type-color-blue { color: var(--type-blue); }
+.type-bg-green { background-color: var(--type-green); }
+.type-bg-purple { background-color: var(--type-purple); }
+.type-bg-yellow { background-color: var(--type-yellow); }
+.type-bg-blue { background-color: var(--type-blue); }
+
 * {
   margin: 0;
   padding: 0;
@@ -51,12 +61,18 @@ body {
 #root {
   max-width: 480px;
   margin: 0 auto;
-  min-height: 100vh;
+  min-height: 100dvh;
   background-color: var(--bg-color);
   position: relative;
-  box-shadow: 0 0 20px rgba(0,0,0,0.05);
   display: flex;
   flex-direction: column;
+}
+
+@media (max-width: 480px) {
+  #root {
+    max-width: 100%;
+    box-shadow: none;
+  }
 }
 
 /* Solid Card Utility */
@@ -75,9 +91,9 @@ body {
   color: white;
   border: none;
   border-radius: 30px;
-  padding: 1rem 1.5rem;
+  padding: 0.9rem 1.2rem;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-family: var(--font-sans);
   cursor: pointer;
   box-shadow: 0 4px 15px var(--accent-glow);
@@ -123,12 +139,16 @@ h1, h2, h3 {
 /* Page Layout */
 .page-container {
   flex: 1;
-  padding: 2rem 1.5rem;
-  padding-bottom: 7rem; /* Space for bottom nav */
+  padding: 1.5rem 1rem;
+  padding-bottom: 6rem; /* Space for bottom nav */
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.2rem;
   animation: fadeIn 0.3s ease-out;
+}
+
+.mt-2 {
+  margin-top: 0.5rem;
 }
 
 @keyframes fadeIn {

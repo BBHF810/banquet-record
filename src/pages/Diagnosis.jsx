@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ArrowRight, RefreshCcw, ShoppingCart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowRight, RefreshCcw, UserCheck } from 'lucide-react';
 import './Diagnosis.css';
 
 /* ══════════════════════════════════════════
@@ -199,46 +200,12 @@ function diagnose(answers) {
 }
 
 /* ══════════════════════════════════════════
-   買い出しヒント生成
-   ══════════════════════════════════════════ */
-function generateHints(tagScores) {
-  const hints = [];
-
-  // 飲酒量
-  if (tagScores.heavy >= 2) hints.push({ icon: '🍺', text: 'お酒はたくさん飲みそう。多めに用意を！' });
-  else if (tagScores.heavy <= -2) hints.push({ icon: '🍺', text: 'お酒は控えめ。少量で大丈夫そう。' });
-
-  // ソフトドリンク
-  if (tagScores.soft >= 1) hints.push({ icon: '🧃', text: 'ソフトドリンク・ノンアル希望あり。忘れずに！' });
-
-  // 炭水化物
-  if (tagScores.carb >= 2) hints.push({ icon: '🍕', text: '炭水化物（ピザ・おにぎり等）は必須！' });
-  else if (tagScores.carb <= -2) hints.push({ icon: '🥗', text: '炭水化物はなくても大丈夫そう。' });
-
-  // 甘いお酒
-  if (tagScores.sweet >= 1) hints.push({ icon: '🍹', text: 'カクテルや梅酒など甘いお酒を用意すると◎' });
-
-  // 定番で十分
-  if (tagScores.basic >= 2) hints.push({ icon: '✅', text: 'ビール・チューハイの定番でOK！' });
-  else if (tagScores.basic <= -2) hints.push({ icon: '🌟', text: '定番だけでは物足りないかも。変わり種も検討！' });
-
-  // 途中退出
-  if (tagScores.exit >= 1) hints.push({ icon: '🚪', text: '途中退出しやすい雰囲気作りを意識して。' });
-
-  // 食事の充実度
-  if (tagScores.food >= 2) hints.push({ icon: '🍳', text: '食事のバリエーションは重視！品数多めで。' });
-
-  if (hints.length === 0) hints.push({ icon: '👍', text: 'バランスの取れた好みです！標準的な準備でOK。' });
-
-  return hints;
-}
-
-/* ══════════════════════════════════════════
    コンポーネント
    ══════════════════════════════════════════ */
 export default function Diagnosis() {
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
+  const navigate = useNavigate();
 
   const handleSelect = (qId, value) => {
     setAnswers({ ...answers, [qId]: value });
@@ -251,6 +218,8 @@ export default function Diagnosis() {
   const handleSubmit = () => {
     const r = diagnose(answers);
     setResult(r);
+    // プロフィールに保存
+    localStorage.setItem('banquetTypeResult', JSON.stringify(r.type));
     window.scrollTo(0, 0);
   };
 
@@ -262,10 +231,9 @@ export default function Diagnosis() {
 
   /* ── 結果画面 ── */
   if (result) {
-    const { type, percentages, tagScores } = result;
+    const { type, percentages } = result;
     const colorVar = `var(--type-${type.colorClass})`;
     const group = groupInfo[type.group];
-    const hints = generateHints(tagScores);
 
     return (
       <div className="page-container result-page">
@@ -345,24 +313,12 @@ export default function Diagnosis() {
           ))}
         </div>
 
-        {/* 買い出しヒント（幹事向け実用情報） */}
-        <div className="mbti-card hints-card">
-          <div className="hints-header">
-            <ShoppingCart size={20} className="text-accent-primary" />
-            <h3 className="stats-title" style={{ marginBottom: 0 }}>買い出しヒント</h3>
-          </div>
-          <p className="hints-desc text-muted">幹事さんへ：この人の準備に役立つ情報です</p>
-          <ul className="hints-list">
-            {hints.map((hint, i) => (
-              <li key={i} className="hint-item">
-                <span className="hint-icon">{hint.icon}</span>
-                <span className="hint-text">{hint.text}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <button className="btn-primary mt-4" onClick={() => navigate('/profile')}>
+          <UserCheck size={18} />
+          マイタイプを見る
+        </button>
 
-        <button className="btn-secondary mt-4" onClick={reset}>
+        <button className="btn-secondary mt-2" onClick={reset}>
           <RefreshCcw size={18} />
           もう一度診断する
         </button>
