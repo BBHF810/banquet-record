@@ -118,9 +118,13 @@
 }
 
 .type-color-green { color: var(--type-green); }
+.type-color-purple { color: var(--type-purple); }
+.type-color-yellow { color: var(--type-yellow); }
+.type-color-blue { color: var(--type-blue); }
 .type-bg-green { background-color: var(--type-green); }
 .type-bg-purple { background-color: var(--type-purple); }
 .type-bg-yellow { background-color: var(--type-yellow); }
+.type-bg-blue { background-color: var(--type-blue); }
 
 .character-card {
   width: 100%;
