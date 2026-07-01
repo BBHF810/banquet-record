@@ -1,67 +1,223 @@
-import { useState } from 'react';
-import { Users, Calculator, Sparkles, Plus, Receipt } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Users, Calculator, Sparkles, Plus, Trash2, Receipt, AlertCircle } from 'lucide-react';
+import { typeDefinitions, initialParticipants, calculateShoppingList } from '../utils/banquetUtils';
 import './HostPlan.css';
 
-const mockParticipants = [
-  { id: 1, name: 'タカシ', type: '酒豪-A' },
-  { id: 2, name: 'ケンジ', type: '爆食-F' },
-  { id: 3, name: 'サトミ', type: '小食-A' },
-  { id: 4, name: 'ユウキ', type: '健康生命体-F' },
-];
-
 export default function HostPlan() {
+  const [participants, setParticipants] = useState([]);
+  const [name, setName] = useState('');
+  const [type, setType] = useState('FKIT');
+  const [allergies, setAllergies] = useState('');
   const [totalCost, setTotalCost] = useState('');
-  const [generatedPlan, setGeneratedPlan] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [planSummary, setPlanSummary] = useState(null);
+  const [toast, setToast] = useState('');
+
+  // 参加者データのロード
+  useEffect(() => {
+    const saved = localStorage.getItem('banquetParticipants');
+    if (saved) {
+      try {
+        setParticipants(JSON.parse(saved));
+      } catch {
+        setParticipants(initialParticipants);
+      }
+    } else {
+      setParticipants(initialParticipants);
+      localStorage.setItem('banquetParticipants', JSON.stringify(initialParticipants));
+    }
+  }, []);
+
+  // 参加者の追加
+  const handleAddParticipant = (e) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+
+    const newParticipant = {
+      id: Date.now(),
+      name: name.trim(),
+      type,
+      allergies: allergies.trim()
+    };
+
+    const updated = [...participants, newParticipant];
+    setParticipants(updated);
+    localStorage.setItem('banquetParticipants', JSON.stringify(updated));
+
+    // フォームリセット
+    setName('');
+    setType('FKIT');
+    setAllergies('');
+    setShowAddForm(false);
+
+    showToast('参加者を追加しました');
+  };
+
+  // 参加者の削除
+  const handleRemoveParticipant = (id) => {
+    const updated = participants.filter(p => p.id !== id);
+    setParticipants(updated);
+    localStorage.setItem('banquetParticipants', JSON.stringify(updated));
+    showToast('参加者を削除しました');
+  };
+
+  // 買い出しプラン生成
+  const handleGeneratePlan = () => {
+    const result = calculateShoppingList(participants);
+    localStorage.setItem('shoppingListItems', JSON.stringify(result.items));
+    setPlanSummary(result.summary);
+    showToast('買い出しリストを生成・更新しました！');
+  };
+
+  // 割り勘請求を送信
+  const handleSendBill = async () => {
+    if (!totalCost || isNaN(totalCost)) return;
+    const perPerson = Math.ceil(parseInt(totalCost) / participants.length);
+    const text = `【幹事より割り勘の請求】\n宅飲みお疲れ様でした！今回の精算連絡です。\n\n総額: ¥${parseInt(totalCost).toLocaleString()}\n人数: ${participants.length}人\n一人当たり: ¥${perPerson.toLocaleString()}\n\n支払いをよろしくお願いします！`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: '割り勘精算請求', text });
+      } catch {
+        // キャンセル時は何もしない
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('請求メッセージをクリップボードにコピーしました！');
+      } catch {
+        showToast('コピーに失敗しました');
+      }
+    }
+  };
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 2000);
+  };
 
   const calculatePerPerson = () => {
-    if (!totalCost || isNaN(totalCost)) return 0;
-    return Math.ceil(parseInt(totalCost) / mockParticipants.length);
+    if (!totalCost || isNaN(totalCost) || participants.length === 0) return 0;
+    return Math.ceil(parseInt(totalCost) / participants.length);
   };
 
   return (
     <div className="page-container">
       <div className="page-header">
         <h2>幹事メニュー</h2>
-        <p className="text-muted">参加者データから最適なプランを作成</p>
+        <p className="text-muted">参加者のタイプを合わせて自動で準備をサポート</p>
       </div>
 
+      {/* 参加者管理 */}
       <div className="mbti-card">
-        <div className="card-header">
-          <Users className="text-accent-primary" size={20} />
-          <h3>現在の参加者 ({mockParticipants.length}人)</h3>
+        <div className="card-header justify-between">
+          <div className="flex items-center gap-2">
+            <Users className="text-accent-primary" size={20} />
+            <h3>参加者リスト ({participants.length}人)</h3>
+          </div>
+          <button 
+            className="btn-add-toggle" 
+            onClick={() => setShowAddForm(!showAddForm)}
+          >
+            {showAddForm ? '閉じる' : '追加'}
+          </button>
         </div>
-        <ul className="participant-list">
-          {mockParticipants.map(p => (
-            <li key={p.id} className="participant-item">
-              <span className="participant-name">{p.name}</span>
-              <span className="participant-type type-color-green">{p.type}</span>
-            </li>
-          ))}
+
+        {showAddForm && (
+          <form onSubmit={handleAddParticipant} className="add-participant-form fade-in">
+            <div className="form-group">
+              <label>名前</label>
+              <input 
+                type="text" 
+                placeholder="例: サトミ" 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+                required 
+              />
+            </div>
+            <div className="form-group">
+              <label>宴会タイプ</label>
+              <select value={type} onChange={(e) => setType(e.target.value)}>
+                {Object.entries(typeDefinitions).map(([code, def]) => (
+                  <option key={code} value={code}>
+                    {def.emoji} {def.name} ({code})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>アレルギー (任意)</label>
+              <input 
+                type="text" 
+                placeholder="例: エビ・カニ、そば" 
+                value={allergies} 
+                onChange={(e) => setAllergies(e.target.value)} 
+              />
+            </div>
+            <button type="submit" className="btn-primary mt-2">
+              <Plus size={18} /> 追加する
+            </button>
+          </form>
+        )}
+
+        <ul className="participant-list mt-3">
+          {participants.map(p => {
+            const def = typeDefinitions[p.type] || { emoji: '👤', name: '未設定', colorClass: 'blue' };
+            return (
+              <li key={p.id} className="participant-item">
+                <div className="participant-info">
+                  <span className="participant-name">{p.name}</span>
+                  <span className={`participant-type type-bg-${def.colorClass}`}>
+                    {def.emoji} {def.name}
+                  </span>
+                  {p.allergies && (
+                    <span className="participant-allergy-tag" title={p.allergies}>
+                      ⚠️ {p.allergies}
+                    </span>
+                  )}
+                </div>
+                <button 
+                  className="btn-icon-danger" 
+                  onClick={() => handleRemoveParticipant(p.id)}
+                  aria-label="削除"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </li>
+            );
+          })}
+          {participants.length === 0 && (
+            <p className="text-muted text-center py-4">参加者が登録されていません</p>
+          )}
         </ul>
-        <button className="btn-secondary w-full mt-3">
-          <Plus size={16} /> 参加者を追加（リンク共有）
-        </button>
       </div>
 
-      {!generatedPlan ? (
-        <button className="btn-primary" onClick={() => setGeneratedPlan(true)}>
-          <Sparkles size={20} />
-          買い出しプランを自動生成
-        </button>
-      ) : (
+      {/* 買い出しプラン生成ボタン */}
+      <button className="btn-primary" onClick={handleGeneratePlan} disabled={participants.length === 0}>
+        <Sparkles size={20} />
+        買い出しプランを自動生成 / 更新
+      </button>
+
+      {/* 生成後のサマリー ＆ 割り勘計算 */}
+      {planSummary && (
         <div className="plan-result fade-in">
           <div className="mbti-card highlight-border">
             <h3 className="plan-title">
               <Sparkles size={18} className="text-accent-yellow" />
-              AI買い出しプラン
+              AI買い出しプラン分析
             </h3>
             <p className="plan-summary">
-              「酒豪-A」が多いため、<strong>アルコール類は多め（一人当たり3〜4杯目安）</strong>が推奨されます。また、「爆食-F」向けに<strong>お腹にたまる炭水化物（ピザ等）を2〜3人前</strong>追加すると満足度が高まります。
+              {planSummary.peopleCount}名分の診断を元に分析しました。
+              {planSummary.hasHeavyDrinkers ? ' お酒に強いメンバーが多いので、アルコールはしっかりめがおすすめです。' : ' お酒は控えめな傾向なので、ソフトドリンクの品揃えを重視しましょう。'}
+              {planSummary.hasHeavyEaters ? ' 食べ盛りのメンバーがいるため、炭水化物（ピザ等）をしっかり用意すると喜ばれます。' : ' 食事は軽め・ヘルシーなつまみを好む傾向です。'}
             </p>
-            <p className="plan-hint text-muted">※詳細は「リスト」タブで確認・追加できます。</p>
+            <div className="alert-box mt-2">
+              <AlertCircle size={16} />
+              <span>「リスト」タブに具体的な数量の買い物リストを反映しました！</span>
+            </div>
           </div>
 
-          <div className="mbti-card mt-4">
+          <div className="mbti-card">
             <div className="card-header">
               <Calculator className="text-accent-purple" size={20} />
               <h3>費用計算（割り勘）</h3>
@@ -83,12 +239,14 @@ export default function HostPlan() {
                 <span className="calc-amount">¥{calculatePerPerson().toLocaleString()}</span>
               </div>
             </div>
-            <button className="btn-primary mt-3" disabled={!totalCost}>
-              参加者に請求を送る
+            <button className="btn-primary mt-3" onClick={handleSendBill} disabled={!totalCost || participants.length === 0}>
+              請求メッセージを送る / コピー
             </button>
           </div>
         </div>
       )}
+
+      {toast && <div className="toast">{toast}</div>}
     </div>
   );
 }
