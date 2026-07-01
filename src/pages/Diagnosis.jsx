@@ -313,9 +313,9 @@ export default function Diagnosis() {
           ))}
         </div>
 
-        <button className="btn-primary mt-4" onClick={() => navigate('/profile')}>
+        <button className="btn-primary mt-4" onClick={() => navigate('/mypage')}>
           <UserCheck size={18} />
-          マイタイプを見る
+          マイページを見る
         </button>
 
         <button className="btn-secondary mt-2" onClick={reset}>

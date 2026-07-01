@@ -4,7 +4,7 @@ import './BottomNav.css';
 
 const navItems = [
   { path: '/diagnosis', label: '診断', icon: UserCheck },
-  { path: '/profile', label: 'マイタイプ', icon: User },
+  { path: '/mypage', label: 'マイページ', icon: User },
   { path: '/host', label: '幹事', icon: Crown },
   { path: '/list', label: 'リスト', icon: ShoppingCart },
 ];

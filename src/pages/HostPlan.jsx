@@ -15,16 +15,54 @@ export default function HostPlan() {
 
   // 参加者データのロード
   useEffect(() => {
+    let currentParticipants = [];
     const saved = localStorage.getItem('banquetParticipants');
     if (saved) {
       try {
-        setParticipants(JSON.parse(saved));
+        currentParticipants = JSON.parse(saved);
       } catch {
-        setParticipants(initialParticipants);
+        currentParticipants = initialParticipants;
       }
     } else {
-      setParticipants(initialParticipants);
-      localStorage.setItem('banquetParticipants', JSON.stringify(initialParticipants));
+      currentParticipants = initialParticipants;
+    }
+
+    // URLからのインポート確認
+    const params = new URLSearchParams(window.location.search);
+    const importData = params.get('import');
+    if (importData) {
+      try {
+        const decoded = JSON.parse(decodeURIComponent(escape(atob(importData))));
+        if (decoded && decoded.name) {
+          const exists = currentParticipants.some(p => p.name === decoded.name);
+          if (!exists) {
+            const newParticipant = {
+              id: Date.now(),
+              name: decoded.name,
+              type: decoded.type || 'FKIT',
+              allergies: decoded.allergies || ''
+            };
+            currentParticipants = [...currentParticipants, newParticipant];
+            localStorage.setItem('banquetParticipants', JSON.stringify(currentParticipants));
+            
+            // トースト表示
+            setToast(`${decoded.name}さんを自動追加しました！`);
+            setTimeout(() => setToast(''), 2000);
+          } else {
+            setToast(`${decoded.name}さんはすでに追加されています`);
+            setTimeout(() => setToast(''), 2000);
+          }
+        }
+      } catch (e) {
+        console.error('Import failed', e);
+      }
+      // クエリ文字列を消去してクリーンにする
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    setParticipants(currentParticipants);
+    if (!saved) {
+      localStorage.setItem('banquetParticipants', JSON.stringify(currentParticipants));
     }
   }, []);
 
