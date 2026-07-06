@@ -40,7 +40,10 @@ export default function HostPlan() {
               id: Date.now(),
               name: decoded.name,
               type: decoded.type || 'FKIT',
-              allergies: decoded.allergies || ''
+              allergies: decoded.allergies || '',
+              favFood: decoded.favFood || '',
+              dislikedFood: decoded.dislikedFood || '',
+              favDrinkName: decoded.favDrinkName || ''
             };
             currentParticipants = [...currentParticipants, newParticipant];
             localStorage.setItem('banquetParticipants', JSON.stringify(currentParticipants));
@@ -214,6 +217,14 @@ export default function HostPlan() {
                     </span>
                   )}
                 </div>
+                {/* 食の好み・お酒表示 */}
+                {(p.favFood || p.dislikedFood || p.favDrinkName) && (
+                  <div className="participant-food-details">
+                    {p.favFood && <span className="food-detail-tag fav">😋 {p.favFood}</span>}
+                    {p.dislikedFood && <span className="food-detail-tag dislike">🤢 {p.dislikedFood}</span>}
+                    {p.favDrinkName && <span className="food-detail-tag drink">🍹 {p.favDrinkName}</span>}
+                  </div>
+                )}
                 <button 
                   className="btn-icon-danger" 
                   onClick={() => handleRemoveParticipant(p.id)}

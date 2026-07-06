@@ -1,13 +1,52 @@
+/* ── Tabs Navigation ── */
+.mypage-tabs {
+  display: flex;
+  background: #e5e7eb;
+  border-radius: 12px;
+  padding: 0.25rem;
+  margin-bottom: 1.2rem;
+}
+
+.tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 0.6rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-sans);
+}
+
+.tab-btn.active {
+  background: white;
+  color: var(--accent-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
 .profile-inputs-container {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
+.share-section {
+  margin-top: 0.5rem;
+}
+
 .share-hint {
   font-size: 0.75rem;
   line-height: 1.4;
-  margin-top: -0.5rem;
+  margin-top: 0.5rem;
   padding: 0 0.5rem;
 }
 
@@ -83,17 +122,32 @@
   cursor: pointer;
   position: relative;
   transition: all 0.2s ease;
+  background-size: cover;
+  background-position: center;
+}
+
+.calendar-day::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.02);
+  border-radius: 8px;
 }
 
 .calendar-day:hover {
-  background: #f3f4f6;
+  background-color: #f3f4f6;
   border-color: var(--accent-primary);
 }
 
 .calendar-day.has-stamp {
-  background: #fff;
   border-color: var(--accent-primary);
-  box-shadow: 0 2px 4px var(--accent-glow);
+}
+
+.calendar-day.selected-day {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  transform: scale(1.05);
+  z-index: 5;
 }
 
 .day-number {
@@ -101,6 +155,8 @@
   font-weight: 700;
   color: var(--text-muted);
   align-self: flex-start;
+  z-index: 2;
+  text-shadow: 0 0 2px white; /* 画像背景のとき用のテキスト影 */
 }
 
 .calendar-day.has-stamp .day-number {
@@ -111,6 +167,146 @@
   font-size: 1.1rem;
   line-height: 1;
   margin-bottom: 0.1rem;
+  z-index: 2;
+}
+
+.photo-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  font-size: 0.65rem;
+  z-index: 2;
+}
+
+/* ── Day Editor Card ── */
+.edit-day-card {
+  border: 1.5px solid var(--accent-primary);
+}
+
+.edit-day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--card-border);
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.edit-day-header h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.btn-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-close:hover {
+  background: #f3f4f6;
+  color: var(--text-secondary);
+}
+
+.stamp-selectors {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+.stamp-select-btn {
+  flex: 1;
+  height: 44px;
+  font-size: 1.5rem;
+  background: #f9fafb;
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.stamp-select-btn:hover {
+  background: #f3f4f6;
+}
+
+.stamp-select-btn.selected {
+  background: var(--accent-glow);
+  border-color: var(--accent-primary);
+  transform: scale(1.05);
+}
+
+/* MVP Photo Upload */
+.mvp-upload-container {
+  margin-top: 0.3rem;
+  display: flex;
+  justify-content: center;
+}
+
+.mvp-upload-placeholder {
+  width: 100%;
+  height: 120px;
+  border: 2px dashed var(--card-border);
+  background: #f9fafb;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mvp-upload-placeholder:hover {
+  background: #f3f4f6;
+  border-color: var(--accent-primary);
+}
+
+.mvp-preview-wrapper {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+}
+
+.mvp-photo-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.btn-remove-photo {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: all 0.2s ease;
+}
+
+.btn-remove-photo:active {
+  transform: scale(0.9);
 }
 
 /* ── Favorite Drink Form ── */
